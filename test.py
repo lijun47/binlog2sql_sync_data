@@ -1,0 +1,1 @@
+UPDATE `blzg`.`sys_user` SET `nickname`='昵称2', `email`='574747217@qq.com', `sex`=0, `avatar`='http://tp.lanlingcb.com/banner/2020/11/26/0c1e51b7a0a96b11b913bc6a5a5db4e5.png' WHERE user_id = 1095;

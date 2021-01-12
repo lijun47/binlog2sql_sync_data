@@ -218,15 +218,14 @@ def company_info_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=F
     dest_fields = ['com_sub_id','scale','nature','main_business','introduction','label','website','lng',\
         'lat','banner','area_code','area_name','address']
 
-    tmp_row = {}
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});UPDATE `{4}`.`{5}` SET {6} = "{7}" WHERE {8} = {9};'.format(
             dest_database, dest_table,','.join(dest_fields),', '.join(['%s'] * len(dest_fields)),
             dest_database,'company_subject','company_logo',row['values']['logo'],'com_sub_id',row['values']['com_sub_id']
         )
-
         for i in dest_fields:
-            tmp_row[i] = row['values'][i]
+            values.append(row['values'][i])
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};UPDATE `{5}`.`{6}` SET {7} = "{8}" WHERE {9} = {10};'.format(
@@ -234,215 +233,193 @@ def company_info_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=F
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['com_sub_id'],
             dest_database,'company_subject','company_logo',row['after_values']['logo'],'com_sub_id',row['after_values']['com_sub_id']
         )
-
         for i in dest_fields[1:]:
-            tmp_row[i] = row['after_values'][i]
+            values.append(row['after_values'][i])
+        values = map(fix_object, values)
 
-    values = map(fix_object, tmp_row.values())
     return {'template': template, 'values': list(values)}
 
 def company_subject_sql_pattern(binlog_event,dest_database,dest_table, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_fields = ['com_sub_id','company_name','credit_code','manage_location','legal_person','busi_license','status','reviewer_id',\
         'reviewer_name','create_time','update_time','remark','id_card_front','id_card_back','bankcard','issuing_bank','verify_account',\
         'payment_money','is_payment','pay_failure_reason','bnkflg','eaccty','bank_outlet']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});'.format(
             dest_database, dest_table,','.join(dest_fields),
             ', '.join(['%s'] * len(dest_fields))
         )
-
         for i in dest_fields:
-            tmp_row[i] = row['values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['values'][i])
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['com_sub_id']
         )
-
         for i in dest_fields[1:]:
-            tmp_row[i] = row['after_values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['after_values'][i])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
 def company_subject_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'blzg'
     dest_table = 'company_subject'
     dest_fields = ['com_sub_id','company_name','credit_code','manage_location','legal_person','busi_license','status','reviewer_id',\
         'reviewer_name','create_time','update_time','remark','id_card_front','id_card_back','bankcard','issuing_bank','verify_account',\
         'payment_money','is_payment','pay_failure_reason','bnkflg','eaccty','bank_outlet']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});'.format(
             dest_database, dest_table,','.join(dest_fields),
             ', '.join(['%s'] * len(dest_fields))
         )
-
         for i in dest_fields:
-            tmp_row[i] = row['values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['values'][i])
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['com_sub_id']
         )
-
         for i in dest_fields[1:]:
-            tmp_row[i] = row['after_values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['after_values'][i])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
 def company_subject_ll_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'api_lanlingcb_dev2'
     dest_table = 'company_subject'
     dest_fields = ['com_sub_id','company_name','credit_code','manage_location','legal_person','busi_license','status','reviewer_id',\
         'reviewer_name','create_time','update_time','remark','id_card_front','id_card_back','bankcard','issuing_bank','verify_account',\
             'payment_money','is_payment','pay_failure_reason','bnkflg','eaccty','bank_outlet']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});'.format(
             dest_database, dest_table,','.join(dest_fields),
             ', '.join(['%s'] * len(dest_fields))
         )
-
         for i in dest_fields:
-            tmp_row[i] = row['values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['values'][i])
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['com_sub_id']
         )
-
         for i in dest_fields[1:]:
-            tmp_row[i] = row['after_values'][i]
-
-        values = map(fix_object, tmp_row.values())
+            values.append(row['after_values'][i])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
 def user_company_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'blzg'
     dest_table = 'sys_user'
     dest_fields = ['user_id','com_sub_id']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['values']['user_id']
         )
-        tmp_row['com_sub_id'] = row['values']['com_sub_id']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['values']['com_sub_id']) 
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['user_id']
         )
-        tmp_row['com_sub_id'] = row['after_values']['com_sub_id']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['after_values']['com_sub_id'])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
 def users_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'blzg'
     dest_table = 'sys_user'
     dest_fields = ['user_id','user_name','phonenumber','password','status','create_time']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});'.format(
             dest_database, dest_table,','.join(dest_fields),
             ', '.join(['%s'] * len(dest_fields))
         )
-        tmp_row['user_id'] = row['values']['id']
-        tmp_row['user_name'] = row['values']['phone']
-        tmp_row['phonenumber'] = row['values']['phone']
-        tmp_row['password'] = row['values']['password']
-        tmp_row['valid'] = row['values']['valid']
-        tmp_row['create_time'] = row['values']['create_time']
+        values.append(row['values']['id'])
+        values.append(row['values']['phone'])
+        values.append(row['values']['phone'])
+        values.append(row['values']['password'])
+        values.append(row['values']['valid'])
+        values.append(row['values']['create_time'])
 
-        values = map(fix_object, tmp_row.values())
+        values = map(fix_object, values)
 
-    elif isinstance(binlog_event, UpdateRowsEvent):
+    elif isinstance(binlog_event, UpdateRowsEvent) and row['before_values']['id'] >100:
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['id']
         )
-        tmp_row['user_name'] = row['after_values']['phone']
-        tmp_row['phonenumber'] = row['after_values']['phone']
-        tmp_row['password'] = row['after_values']['salt']
-        tmp_row['valid'] = row['after_values']['valid']
-        tmp_row['create_time'] = row['after_values']['create_time']
+        values.append(row['after_values']['phone'])
+        values.append(row['after_values']['phone'])
+        values.append(row['after_values']['password'])
+        values.append(row['after_values']['valid'])
+        values.append(row['after_values']['create_time'])
 
-        values = map(fix_object, tmp_row.values())
+        values = map(fix_object,values)
 
     return {'template': template, 'values': list(values)}
 
 def users_ll_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'api_lanlingcb_dev2'
     dest_table = 'worker'
     dest_fields = ['worker_id','financial_account_id','worker_password','worker_phone','valid','create_time','is_del','salt']
-    tmp_row = {}
+
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'INSERT INTO `{0}`.`{1}`({2}) VALUES ({3});'.format(
             dest_database, dest_table,','.join(dest_fields),
             ', '.join(['%s'] * len(dest_fields))
         )
 
-        tmp_row['worker_id'] = row['values']['id']
-        tmp_row['financial_account_id'] = 'wok'+str(row['values']['id'])
-        tmp_row['worker_password'] = row['values']['password']
-        tmp_row['worker_phone'] = row['values']['phone']
-        tmp_row['valid'] = row['values']['valid']
-        tmp_row['create_time'] = row['values']['create_time']
-        tmp_row['is_del'] = row['values']['is_delete']
-        tmp_row['salt'] = row['values']['salt']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['values']['id']) 
+        values.append('wok'+str(row['values']['id']))
+        values.append(row['values']['password'])
+        values.append(row['values']['phone'])
+        values.append(row['values']['valid'])
+        values.append(row['values']['create_time'])
+        values.append(row['values']['is_delete'])
+        values.append(row['values']['salt'])
+        values = map(fix_object, values)
 
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[2:]]),dest_fields[0],row['before_values']['id']
         )
-        tmp_row['worker_password'] = row['after_values']['password']
-        tmp_row['worker_phone'] = row['after_values']['phone']
-        tmp_row['valid'] = row['after_values']['valid']
-        tmp_row['create_time'] = row['after_values']['create_time']
-        tmp_row['is_del'] = row['after_values']['is_delete']
-        tmp_row['salt'] = row['after_values']['salt']
-        values = map(fix_object, tmp_row.values())
+        values.append(row['after_values']['password'])
+        values.append(row['after_values']['phone'])
+        values.append(row['after_values']['valid'])
+        values.append(row['after_values']['create_time'])
+        values.append(row['after_values']['is_delete'])
+        values.append(row['after_values']['salt'])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
@@ -452,76 +429,70 @@ def user_infos_bl_sql_pattern(binlog_event, row=None, flashback=False, no_pk=Fal
 
     dest_database = 'blzg'
     dest_table = 'sys_user'
-    dest_fields = ['user_id','nickname','email','sex','avatar']
-    tmp_row = {}
+    dest_fields = ['user_id','nick_name','email','sex','avatar']
 
     if isinstance(binlog_event, WriteRowsEvent):
-        template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4} and user_id > 100 ;'.format(
+        template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['values']['user_id']
         )
-        tmp_row['nickname'] = row['values']['nickname']
-        tmp_row['email'] = row['values']['email']
-        tmp_row['sex'] = row['values']['sex']
-        tmp_row['avatar'] = row['values']['photo']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['values']['nickname'])
+        values.append(row['values']['email'])
+        values.append(row['values']['sex'])
+        values.append(row['values']['photo'])
+        values = map(fix_object, values)
     
-    elif isinstance(binlog_event, UpdateRowsEvent):
-        template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4} and user_id > 100 ;'.format(
+    elif isinstance(binlog_event, UpdateRowsEvent) and row['before_values']['user_id'] >100:
+        template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['user_id']
         )
-        tmp_row['nickname'] = row['after_values']['nickname']
-        tmp_row['email'] = row['after_values']['email']
-        tmp_row['sex'] = row['after_values']['sex']
-        tmp_row['avatar'] = row['after_values']['photo']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['after_values']['nickname'])
+        values.append(row['after_values']['email'])
+        values.append(row['after_values']['sex'])
+        values.append(row['after_values']['photo'])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 
 def user_infos_ll_sql_pattern(binlog_event, row=None, flashback=False, no_pk=False):
     template = ''
     values = []
-
     dest_database = 'api_lanlingcb_dev2'
     dest_table = 'worker'
     dest_fields = ['worker_id','sn','worker_name','nickname','sex','worker_email','certified','photo_url','information','score']
-    tmp_row = {}
 
     if isinstance(binlog_event, WriteRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['values']['user_id']
         )
-        tmp_row['sn'] = row['values']['sn']
-        tmp_row['worker_name'] = row['values']['real_name']
-        tmp_row['nickname'] = row['values']['nickname']
-        tmp_row['sex'] = row['values']['sex']
-        tmp_row['worker_email'] = row['values']['email']
-        tmp_row['certified'] = row['values']['certified']
-        tmp_row['photo_url'] = row['values']['photo']
-        tmp_row['information'] = row['values']['per_sign']
-        tmp_row['score'] = row['values']['score']
-
-        values = map(fix_object, tmp_row.values())
+        values.append(row['values']['sn'])
+        values.append(row['values']['real_name'])
+        values.append(row['values']['nickname'])
+        values.append(row['values']['sex'])
+        values.append(row['values']['email'])
+        values.append(row['values']['certified'])
+        values.append(row['values']['photo'])
+        values.append(row['values']['per_sign'])
+        values.append(row['values']['score'])
+        values = map(fix_object, values)
     
     elif isinstance(binlog_event, UpdateRowsEvent):
         template = 'UPDATE `{0}`.`{1}` SET {2} WHERE {3} = {4};'.format(
             dest_database, dest_table,
             ', '.join(['`%s`=%%s' % k for k in dest_fields[1:]]),dest_fields[0],row['before_values']['user_id']
         )
-        tmp_row['sn'] = row['after_values']['sn']
-        tmp_row['worker_name'] = row['after_values']['real_name']
-        tmp_row['nickname'] = row['after_values']['nickname']
-        tmp_row['sex'] = row['after_values']['sex']
-        tmp_row['worker_email'] = row['after_values']['email']
-        tmp_row['certified'] = row['after_values']['certified']
-        tmp_row['photo_url'] = row['after_values']['photo']
-        tmp_row['information'] = row['after_values']['per_sign']
-        tmp_row['score'] = row['after_values']['score']
-        values = map(fix_object, tmp_row.values())
+        values.append(row['after_values']['sn'])
+        values.append(row['after_values']['real_name'])
+        values.append(row['after_values']['nickname'])
+        values.append(row['after_values']['sex'])
+        values.append(row['after_values']['email'])
+        values.append(row['after_values']['certified'])
+        values.append(row['after_values']['photo'])
+        values.append(row['after_values']['per_sign'])
+        values.append(row['after_values']['score'])
+        values = map(fix_object, values)
 
     return {'template': template, 'values': list(values)}
 

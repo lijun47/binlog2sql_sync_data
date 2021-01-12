@@ -12,7 +12,7 @@ from binlog2sql_util import command_line_args, concat_sql_from_binlog_event, cre
 
 class Binlog2sql(object):
 
-    def __init__(self, connection_settings, start_file=None, start_pos=None, end_file=None, end_pos=None,
+    def __init__(self, connection_settings, dest_connection_settings, start_file=None, start_pos=None, end_file=None, end_pos=None,
                  start_time=None, stop_time=None, only_schemas=None, only_tables=None, no_pk=False,
                  flashback=False, stop_never=False, back_interval=1.0, only_dml=True, sql_type=None):
         """
@@ -23,6 +23,8 @@ class Binlog2sql(object):
             raise ValueError('Lack of parameter: start_file')
 
         self.conn_setting = connection_settings
+        self.dest_conn_setting = dest_connection_settings
+        self.start_file = start_file
         self.start_file = start_file
         self.start_pos = start_pos if start_pos else 4    # use binlog v4
         self.end_file = end_file if end_file else start_file
@@ -69,6 +71,7 @@ class Binlog2sql(object):
             self.server_id = cursor.fetchone()[0]
             if not self.server_id:
                 raise ValueError('missing server_id in %s:%s' % (self.conn_setting['host'], self.conn_setting['port']))
+        self.dest_connection = pymysql.connect(**self.dest_conn_setting)
 
     def process_binlog(self):
         stream = BinLogStreamReader(connection_settings=self.conn_setting, server_id=self.server_id,
@@ -81,9 +84,10 @@ class Binlog2sql(object):
         e_start_pos, last_pos = stream.log_pos, stream.log_pos
 
         #回滚sql生成文件:IP+PORT
-        tmp_file = create_unique_file('%s.%s' % (self.conn_setting['host'], self.conn_setting['port']))
+        #tmp_file = create_unique_file('%s.%s' % (self.conn_setting['host'], self.conn_setting['port']))
 
-        with temp_open(tmp_file, "w") as f_tmp, self.connection as cursor:
+        #with temp_open(tmp_file, "w") as f_tmp, self.connection as cursor, self.dest_connection as dest_cursor:
+        with self.connection as cursor, self.dest_connection as dest_cursor:
             for binlog_event in stream:
 
                 #不持续解析binlog
@@ -125,14 +129,16 @@ class Binlog2sql(object):
                         sql = concat_sql_from_binlog_event(cursor=cursor, binlog_event=binlog_event, no_pk=self.no_pk,
                                                            row=row, flashback=self.flashback, e_start_pos=e_start_pos)
                         if self.flashback:
-                            f_tmp.write(sql + '\n')
+                            #f_tmp.write(sql + '\n')
+                            print("generate flashback sql.")
                         else:
-                            print(sql)
                             for value in sql.values():
                                 try:
-                                    cursor.execute(value)
-                                except Exception:
-                                    pass
+                                    print(value)
+                                    dest_cursor.execute("%s" %value)
+                                    self.dest_connection.commit()
+                                except Exception as e:
+                                    print(e)
 
                 #binlog发生切换:
                 if not (isinstance(binlog_event, RotateEvent) or isinstance(binlog_event, FormatDescriptionEvent)):
@@ -143,9 +149,10 @@ class Binlog2sql(object):
                     break
 
             stream.close()
-            f_tmp.close()
-            if self.flashback:
-                self.print_rollback_sql(filename=tmp_file)
+            
+            #f_tmp.close()
+            #if self.flashback:
+            #    self.print_rollback_sql(filename=tmp_file)
         return True
 
     def print_rollback_sql(self, filename):
@@ -165,12 +172,7 @@ class Binlog2sql(object):
     def __del__(self):
         pass
 
+def main():
+    pass
 if __name__ == '__main__':
-    args = command_line_args(sys.argv[1:])
-    conn_setting = {'host': args.host, 'port': args.port, 'user': args.user, 'passwd': args.password, 'charset': 'utf8'}
-    binlog2sql = Binlog2sql(connection_settings=conn_setting, start_file=args.start_file, start_pos=args.start_pos,
-                            end_file=args.end_file, end_pos=args.end_pos, start_time=args.start_time,
-                            stop_time=args.stop_time, only_schemas=args.databases, only_tables=args.tables,
-                            no_pk=args.no_pk, flashback=args.flashback, stop_never=args.stop_never,
-                            back_interval=args.back_interval, only_dml=args.only_dml, sql_type=args.sql_type)
-    binlog2sql.process_binlog()
+    main()
